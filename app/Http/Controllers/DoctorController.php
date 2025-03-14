@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Doctor;
+use App\Models\Surgery;
 use Illuminate\Http\Request;
 
 class DoctorController extends Controller
@@ -36,7 +37,7 @@ class DoctorController extends Controller
                     'code' => 1,
                     'msg' => '医生正在手术中，不能重复手术,请先结束手术'
                 ]);
-            $surgery = Doctor::find($surgery_id);
+            $surgery = Surgery::find($surgery_id);
             if (!$surgery) {
                 return response()->json([
                     'code' => 1,

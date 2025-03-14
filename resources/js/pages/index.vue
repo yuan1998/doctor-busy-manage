@@ -1,9 +1,8 @@
 <template>
     <div>
         <h2 class="page-title">
-            🚀 医生面诊
+            🚀 整形外科医生手术动态表
         </h2>
-
         <List item-layout="horizontal"
               :loading="doctorStore.loading"
               :data-source="doctorStore.doctorList">

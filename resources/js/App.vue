@@ -5,8 +5,3 @@
         </main>
     </div>
 </template>
-<script setup>
-import { Head } from '@unhead/vue/components'
-
-
-</script>
