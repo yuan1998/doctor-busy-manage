@@ -3,6 +3,11 @@
         <h2 class="page-title">
             🚀 整形外科医生手术动态表
         </h2>
+        <h4 style="margin: 0;padding-left: 25px;">
+            {{
+                dayjs().format('YYYY-MM-DD')
+            }}
+        </h4>
         <List item-layout="horizontal"
               :loading="doctorStore.loading"
               :data-source="doctorStore.doctorList">
@@ -36,7 +41,7 @@
                 </ListItem>
             </template>
             <template #footer>
-                <div v-if="!doctorStore.loading"  style="text-align: center;">
+                <div v-if="!doctorStore.loading" style="text-align: center;">
                     <Button @click="reloadDoctor">刷新医生状态</Button>
                 </div>
             </template>
@@ -44,7 +49,8 @@
     </div>
 </template>
 <script setup>
-import {List, ListItem, Card, BadgeRibbon, Space, Progress, Tag,Button} from 'ant-design-vue';
+import dayjs from "dayjs";
+import {List, ListItem, Card, BadgeRibbon, Space, Progress, Tag, Button} from 'ant-design-vue';
 import {useDoctorStore} from "../stores/doctor";
 import {onMounted} from "vue";
 import {useHead} from "@unhead/vue";

@@ -24,6 +24,7 @@ class Doctor extends Model
         'enable',
         'status',
         'surgery_id',
+        'surgery_room',
         'start_date',
         'end_date',
     ];

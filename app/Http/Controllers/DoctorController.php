@@ -45,6 +45,7 @@ class DoctorController extends Controller
                 ]);
             }
             $doctor->status = Doctor::STATUS_IN_SURGERY;
+            $doctor->surgery_room = $request->get("surgery_room");
             $doctor->surgery_id = $surgery_id;
             $startDate = $request->get("start_date");
             $endDate = $request->get("end_date");
@@ -57,6 +58,7 @@ class DoctorController extends Controller
         } else {
             $doctor->status = $status;
             $doctor->surgery_id = null;
+            $doctor->surgery_room = null;
             $doctor->start_date = null;
             $doctor->end_date = null;
         }

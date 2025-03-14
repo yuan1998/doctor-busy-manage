@@ -11,7 +11,12 @@
                 <ListItem>
                     <Space direction="vertical" style="width:100%">
                         <BadgeRibbon :text="item.statusText" :color="item.statusColor">
-                            <Card hoverable class="w-full" :title="item.name">
+                            <Card hoverable class="w-full" >
+                                <template #title>
+                                    <div>
+                                        <b>{{item.name}}</b> <Tag v-if="item.status === 1" color="#f50">手术间{{ item.surgery_room }}</Tag>
+                                    </div>
+                                </template>
                                 <Space v-if="item.status === 0">
                                     <Button type="primary" @click="showDrawer(item)">开始手术</Button>
                                     <Button @click="handleRest(item.id)">休息</Button>
@@ -20,23 +25,29 @@
                                     <Button type="primary" @click="handleDoctorWork(item.id)">上班</Button>
                                 </Space>
                                 <div v-if="item.status === 1">
-                                    <div style="padding-bottom:10px;">
-                                        <b>
+                                    <Space direction="vertical" style="padding-bottom:10px;">
+                                        <div>
                                             当前手术项目:
                                             <Tag color="#f50">{{ item.surgery_name }}</Tag>
-                                        </b>
-                                        <b>
-                                            手术预计时间:
+                                        </div>
+                                        <div>
+                                            手术开始时间:
                                             <Tag color="orange">{{ item.start_time }}</Tag>
-                                            ~
+                                        </div>
+                                        <div>
+                                            手术预计结束时间:
                                             <Tag color="orange">{{ item.end_time }}</Tag>
-                                        </b>
-                                    </div>
+                                        </div>
+                                    </Space>
                                     <Progress :percent="item.progress" :show-info="false"/>
                                     <p v-if="item.progress === 100" style="color: rgb(153 143 143);padding:10px 0;margin:0;">
                                         手术可能已经结束.
                                     </p>
-                                    <Button danger type="primary" @click="handleEndSurgery(item.id)">结束手术</Button>
+                                    <Space>
+                                        <Button danger type="primary" @click="handleEndSurgery(item.id)">结束手术</Button>
+<!--                                        <Button >推迟结束时间</Button>-->
+
+                                    </Space>
 
                                 </div>
                             </Card>
@@ -81,13 +92,25 @@
                             </SelectOption>
                         </Select>
                     </FormItem>
-                    <FormItem ref="range" label="预计手术时间" name="range">
-                        <TimeRangePicker v-model:value="formState.range"/>
+                    <FormItem ref="end_date" label="预计手术时间" name="end_date">
+                        <TimePicker v-model:value="formState.end_date" format="HH:mm"/>
+                    </FormItem>
+                    <FormItem ref="surgery_room" label="手术室" name="surgery_room">
+                        <RadioGroup v-model:value="formState.surgery_room" :options="plainOptions"/>
+                    </FormItem>
+                    <FormItem>
+                        <Space>
+                            <Button type="primary" :loading="submitLoading" @click="handleOnSubmit">开始手术</Button>
+                            <Button :disbabled="submitLoading" @click="onDrawerCancel">取消</Button>
+                        </Space>
                     </FormItem>
                 </Form>
             </Spin>
         </Drawer>
 
+        <Modal v-model:open="visbleModal" title="Title" >
+            <p>ces</p>
+        </Modal>
     </div>
 </template>
 <script setup>
@@ -105,7 +128,8 @@ import {
     Form,
     FormItem,
     Spin,
-    TimeRangePicker,
+    RadioGroup,
+    TimePicker,
     Select,
     SelectOption
 } from 'ant-design-vue';
@@ -115,13 +139,15 @@ import dayjs from "dayjs";
 import {useHead} from "@unhead/vue";
 
 const open = ref(false);
+const visbleModal = ref(false);
 const showConfirm = ref(false);
 const submitLoading = ref(false);
 const activeItem = ref(null);
 const formRef = ref();
 const formState = reactive({
     'surgery_id': null,
-    'range': [],
+    'surgery_room': null,
+    'end_date': null,
 })
 
 const labelCol = {span: 5};
@@ -130,16 +156,21 @@ const rules = {
     surgery_id: [
         {required: true, message: '请选择手术项目', trigger: 'change'},
     ],
-    range: [
+    end_date: [
         {required: true, message: '请选择手术时间', trigger: 'change'},
     ],
+    surgery_room: [
+        {required: true, message: '请选择手术室', trigger: 'change'},
+    ],
 }
+const plainOptions = Array.from({length: 10}, (_, i) => ({label: `手术室${i + 1}`, value: i + 1}));
 const doctorStore = useDoctorStore();
 
 
 const handleChange = (val) => {
     let item = doctorStore.surgeries.find((item) => item.id === val);
-    formState.range = [dayjs(), dayjs().add(item.surgery_time, 'minute')]
+    formState.end_date = dayjs().add(item.surgery_time, 'minute');
+    // formState.range = [dayjs(), dayjs().add(item.surgery_time, 'minute')]
 }
 
 const showDrawer = (item) => {
@@ -159,8 +190,9 @@ const handleOnSubmit = () => {
             submitLoading.value = true;
             let response = await doctorStore.startSurgery(activeItem.value.id, {
                 surgery_id: formState.surgery_id,
-                start_date: formState.range[0].format('YYYY-MM-DD HH:mm:ss'),
-                end_date: formState.range[1].format('YYYY-MM-DD HH:mm:ss'),
+                surgery_room: formState.surgery_room,
+                start_date: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+                end_date: formState.end_date.format('YYYY-MM-DD HH:mm:ss'),
             });
             submitLoading.value = false;
             if (response.data.code === 0) {
