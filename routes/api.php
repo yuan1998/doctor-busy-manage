@@ -17,3 +17,17 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::group([
+    'prefix' => 'doctors',
+],function () {
+    Route::get('/', [\App\Http\Controllers\DoctorController::class, 'index']);
+    Route::put('/{id}', [\App\Http\Controllers\DoctorController::class, 'update']);
+});
+
+Route::group([
+    'prefix' => 'surgeries',
+],function () {
+    Route::get('/', [\App\Http\Controllers\SurgeryController::class, 'index']);
+});
+
