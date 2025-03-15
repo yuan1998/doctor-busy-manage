@@ -15,20 +15,30 @@
                 <ListItem>
                     <Space direction="vertical" style="width:100%">
                         <BadgeRibbon :text="item.statusText" :color="item.statusColor">
-                            <Card hoverable class="w-full" :title="item.name">
+                            <Card hoverable class="w-full" >
+                                <template #title>
+                                    <div>
+                                        <b style="margin-right:10px;">{{item.name}}</b>
+                                        <Tag v-if="item.status === 1" color="#f50">
+                                            手术间{{ item.surgery_room }}
+                                        </Tag>
+                                    </div>
+                                </template>
                                 <div v-if="item.status === 1">
-                                    <div style="padding-bottom:10px;">
-                                        <b>
+                                    <Space direction="vertical" style="padding-bottom:10px;">
+                                        <div>
                                             当前手术项目:
                                             <Tag color="#f50">{{ item.surgery_name }}</Tag>
-                                        </b>
-                                        <b>
-                                            手术预计时间:
+                                        </div>
+                                        <div>
+                                            手术开始时间:
                                             <Tag color="orange">{{ item.start_time }}</Tag>
-                                            ~
+                                        </div>
+                                        <div>
+                                            手术预计结束时间:
                                             <Tag color="orange">{{ item.end_time }}</Tag>
-                                        </b>
-                                    </div>
+                                        </div>
+                                    </Space>
                                     <Progress :percent="item.progress" :show-info="false"/>
                                     <p v-if="item.progress === 100" style="color: rgb(153 143 143);padding-top: 10px;margin:0;">
                                         手术可能已经结束.

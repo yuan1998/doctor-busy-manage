@@ -11,10 +11,11 @@
                 <ListItem>
                     <Space direction="vertical" style="width:100%">
                         <BadgeRibbon :text="item.statusText" :color="item.statusColor">
-                            <Card hoverable class="w-full" >
+                            <Card hoverable class="w-full">
                                 <template #title>
                                     <div>
-                                        <b>{{item.name}}</b> <Tag v-if="item.status === 1" color="#f50">手术间{{ item.surgery_room }}</Tag>
+                                        <b style="margin-right:10px;">{{ item.name }}</b>
+                                        <Tag v-if="item.status === 1" color="#f50">手术间{{ item.surgery_room }}</Tag>
                                     </div>
                                 </template>
                                 <Space v-if="item.status === 0">
@@ -45,8 +46,7 @@
                                     </p>
                                     <Space>
                                         <Button danger type="primary" @click="handleEndSurgery(item.id)">结束手术</Button>
-<!--                                        <Button >推迟结束时间</Button>-->
-
+                                        <Button @click="handleDelaySurgery(item)">推迟结束时间</Button>
                                     </Space>
 
                                 </div>
@@ -63,24 +63,26 @@
             </template>
         </List>
 
-        <Drawer size="large" title="医生手术!启动!" placement="bottom" :loading="submitLoading" :open="open" @close="onClose">
-            <template #extra>
-                <Button style="margin-right: 8px" :disbabled="submitLoading" @click="onDrawerCancel">取消</Button>
-                <Button type="primary" :loading="submitLoading" @click="handleOnSubmit">开始手术</Button>
+        <Modal v-model:open="open" :loading="submitLoading" :maskClosable="false">
+            <template #footer>
+                <Space>
+                    <Button :disbabled="submitLoading" @click="onDrawerCancel">取消</Button>
+                    <Button type="primary" :loading="submitLoading" @click="handleOnSubmit">开始手术</Button>
+                </Space>
+            </template>
+            <template #title>
+                {{ activeItem.name }} 医生!启动!
             </template>
             <Spin :spinning="submitLoading">
                 <Form
+                    style="padding-top: 30px;"
                     ref="formRef"
                     :model="formState"
                     :rules="rules"
-                    :label-col="labelCol"
-                    :wrapper-col="wrapperCol"
+                    :labelWrap="true"
                     :loading="submitLoading"
                     v-if="activeItem"
                 >
-                    <FormItem label="医生名称">
-                        <div> {{ activeItem.name }}</div>
-                    </FormItem>
                     <FormItem ref="surgery_id" label="手术项目" name="surgery_id">
                         <Select
                             ref="select"
@@ -92,24 +94,40 @@
                             </SelectOption>
                         </Select>
                     </FormItem>
-                    <FormItem ref="end_date" label="预计手术时间" name="end_date">
+                    <FormItem ref="end_date" label="预计手术结束时间" name="end_date">
                         <TimePicker v-model:value="formState.end_date" format="HH:mm"/>
                     </FormItem>
                     <FormItem ref="surgery_room" label="手术室" name="surgery_room">
                         <RadioGroup v-model:value="formState.surgery_room" :options="plainOptions"/>
                     </FormItem>
-                    <FormItem>
-                        <Space>
-                            <Button type="primary" :loading="submitLoading" @click="handleOnSubmit">开始手术</Button>
-                            <Button :disbabled="submitLoading" @click="onDrawerCancel">取消</Button>
-                        </Space>
-                    </FormItem>
                 </Form>
             </Spin>
-        </Drawer>
+        </Modal>
 
-        <Modal v-model:open="visbleModal" title="Title" >
-            <p>ces</p>
+        <Modal v-model:open="visbleModal" title="推迟手术时间">
+            <RadioGroup v-model:value="delayEndTime" :disabled="delaySurgeryLoading">
+                <Radio :style="radioStyle" :value="10">10 分钟</Radio>
+                <Radio :style="radioStyle" :value="20">20 分钟</Radio>
+                <Radio :style="radioStyle" :value="30">30 分钟</Radio>
+                <Radio :style="radioStyle" :value="0">
+                    其他
+                    <template v-if="delayEndTime === 0">
+                        <InputNumber :min="1"
+                                     v-model:value="delayEndTimeMore"
+                                     addon-after="分钟"
+                                     style="width: 150px; margin-left: 10px"/>
+                    </template>
+                </Radio>
+            </RadioGroup>
+            <template v-if="!!delayTimeErrorMsg">
+                <p style="color: red;">{{ delayTimeErrorMsg }}</p>
+            </template>
+            <template #footer>
+                <Space>
+                    <Button :disbabled="delaySurgeryLoading" @click="onDelayModalCancel">取消</Button>
+                    <Button type="primary" :loading="delaySurgeryLoading" @click="handleDelaySurgerySubmit">确认</Button>
+                </Space>
+            </template>
         </Modal>
     </div>
 </template>
@@ -124,7 +142,8 @@ import {
     Tag,
     Button,
     Modal,
-    Drawer,
+    Radio,
+    InputNumber,
     Form,
     FormItem,
     Spin,
@@ -141,15 +160,25 @@ import {useHead} from "@unhead/vue";
 const open = ref(false);
 const visbleModal = ref(false);
 const showConfirm = ref(false);
+const delayTimeErrorMsg = ref("");
+const delaySurgeryLoading = ref(false);
 const submitLoading = ref(false);
 const activeItem = ref(null);
+const delayActiveItem = ref(null);
 const formRef = ref();
 const formState = reactive({
     'surgery_id': null,
     'surgery_room': null,
     'end_date': null,
 })
-
+const radioStyle = reactive({
+    display: 'flex',
+    height: '30px',
+    lineHeight: '30px',
+});
+// 推迟结束时间
+const delayEndTime = ref(1);
+const delayEndTimeMore = ref(1);
 const labelCol = {span: 5};
 const wrapperCol = {span: 13};
 const rules = {
@@ -216,6 +245,12 @@ const resetForm = () => {
     formRef.value.resetFields();
 };
 
+const onDelayModalCancel = () => {
+    visbleModal.value = false;
+    delayActiveItem.value = null;
+    delayTimeErrorMsg.value = '';
+}
+
 const handleRest = (id) => {
     Modal.confirm({
         title: '确认医生休息?',
@@ -271,7 +306,30 @@ const handleEndSurgery = (id) => {
     });
 }
 
-const handleStartSurgery = (id) => {
+const handleDelaySurgery = (item) => {
+    delayActiveItem.value = item;
+    visbleModal.value = true;
+    delayEndTime.value = 30;
+    delayEndTimeMore.value = 60;
+}
+
+const handleDelaySurgerySubmit = async () => {
+    if (!delayEndTime.value && !delayEndTimeMore.value) {
+        delayTimeErrorMsg.value = "请输入正确的时间";
+        return;
+    }
+    delayTimeErrorMsg.value = '';
+    let minutes = delayEndTime.value || delayEndTimeMore.value;
+    let endDate = dayjs(delayActiveItem.value.end_date).add(minutes, 'minute').format('YYYY-MM-DD HH:mm:ss');
+    delaySurgeryLoading.value = true;
+    let response = await doctorStore.delaySurgery(delayActiveItem.value.id, {
+        'end_date': endDate
+    })
+    delaySurgeryLoading.value = false;
+    console.log("response",response);
+    if (response.data.code === 0) {
+        onDelayModalCancel();
+    }
 
 }
 

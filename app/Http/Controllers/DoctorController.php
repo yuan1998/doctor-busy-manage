@@ -68,4 +68,33 @@ class DoctorController extends Controller
             'msg' => '修改成功'
         ]);
     }
+
+    public function delaySurgeryEndTime(Request $request, $id)
+    {
+        $doctor = Doctor::find($id);
+        if (!$doctor) {
+            return response()->json([
+                'code' => 1,
+                'msg' => '医生不存在'
+            ]);
+        }
+        if ($doctor->status !== Doctor::STATUS_IN_SURGERY)
+            return response()->json([
+                'code' => 1,
+                'msg' => '医生不在手术中'
+            ]);
+        $endDate = $request->get("end_date");
+        if (!$endDate) {
+            return response()->json([
+                'code' => 1,
+                'msg' => '请指定手术结束时间'
+            ]);
+        }
+        $doctor->end_date = $endDate;
+        $doctor->save();
+        return response()->json([
+            'code' => 0,
+            'msg' => '修改手术结束时间成功'
+        ]);
+    }
 }

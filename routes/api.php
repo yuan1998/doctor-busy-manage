@@ -23,6 +23,7 @@ Route::group([
 ],function () {
     Route::get('/', [\App\Http\Controllers\DoctorController::class, 'index']);
     Route::put('/{id}', [\App\Http\Controllers\DoctorController::class, 'update']);
+    Route::put('/{id}/delay_surgery_end_time', [\App\Http\Controllers\DoctorController::class, 'delaySurgeryEndTime']);
 });
 
 Route::group([

@@ -43,6 +43,9 @@ export const doctorIndex = async () => {
 export const doctorUpdate =  (id, params) => {
     return  requestPut(`/api/doctors/${id}`, params);
 }
+export const doctorDelaySurgery =  (id, params) => {
+    return  requestPut(`/api/doctors/${id}/delay_surgery_end_time`, params);
+}
 
 export const surgeryIndex = async () => {
     return await requestGet('/api/surgeries');

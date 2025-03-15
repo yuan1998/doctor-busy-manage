@@ -1,6 +1,6 @@
 import {defineStore} from 'pinia'
 import {ref} from "vue";
-import {doctorIndex, doctorUpdate, surgeryIndex} from "../api";
+import {doctorDelaySurgery, doctorIndex, doctorUpdate, surgeryIndex} from "../api";
 import dayjs from 'dayjs';
 
 const statusMap = {
@@ -82,6 +82,16 @@ export const useDoctorStore = defineStore('doctors', () => {
         await doctorSwitchStatus(id, 2);
     }
 
+    const delaySurgery = async (id ,params) => {
+        let response = await doctorDelaySurgery(id , params)
+        let end = dayjs(params.end_date);
+        updateDoctor(id, {
+            ...params,
+            end_time:end.format('HH:mm'),
+        })
+        return response;
+    }
+
     const doctorSwitchStatus = async (id , status) => {
         let response = await doctorUpdate(id, {status: status});
         updateDoctor(id, {
@@ -106,6 +116,7 @@ export const useDoctorStore = defineStore('doctors', () => {
         endSurgery,
         startSurgery,
         doctorRest,
+        delaySurgery,
         doctorNormal
     }
 })
