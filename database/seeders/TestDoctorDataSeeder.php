@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Doctor;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class TestDoctorDataSeeder extends Seeder
 {
@@ -41,7 +42,10 @@ class TestDoctorDataSeeder extends Seeder
                 "赵四",
             ]
         ];
+
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         Doctor::query()->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
         foreach ($data as $departmentName => $doctors) {
             $department = \App\Models\Department::query()->where('name', $departmentName)->first();
             if (!$department) {

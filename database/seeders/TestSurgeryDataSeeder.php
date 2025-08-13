@@ -6,6 +6,7 @@ use App\Models\Department;
 use App\Models\Surgery;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class TestSurgeryDataSeeder extends Seeder
 {
@@ -143,7 +144,10 @@ class TestSurgeryDataSeeder extends Seeder
                 ]
             ]
         ];
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         Surgery::query()->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
         foreach ($data as $key => $item) {
             $department = Department::query()->where('name', $key)->first();
             foreach ($item as $surgery) {
