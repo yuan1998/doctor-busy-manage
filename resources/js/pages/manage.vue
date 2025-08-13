@@ -1,7 +1,7 @@
 <template>
-    <div>
+    <div style="background: #ffffff;">
         <h2 class="page-title">
-            🚀 医生状态管理
+            🚀{{ doctorStore.department?.name || '' }}医生状态管理
         </h2>
 
         <List item-layout="horizontal"
@@ -13,39 +13,50 @@
                         <BadgeRibbon :text="item.statusText" :color="item.statusColor">
                             <Card hoverable class="w-full">
                                 <template #title>
-                                    <div>
-                                        <b style="margin-right:10px;">{{ item.name }}</b>
-                                        <Tag v-if="item.status === 1" color="#f50">手术间{{ item.surgery_room }}</Tag>
-                                    </div>
+                                    <Space>
+                                        <div>
+                                            <b style="margin-right:10px;">{{ item.name }}</b>
+                                            <Tag v-if="item.status === 1 && item.surgery_room" color="#f50">手术间{{ item.surgery_room }}</Tag>
+                                        </div>
+                                        <Button v-if="!singlePage" type="link" @click="toDoctorPage(item.id)">单独页</Button>
+                                    </Space>
                                 </template>
                                 <Space v-if="item.status === 0">
-                                    <Button type="primary" @click="showDrawer(item)">开始手术</Button>
+                                    <Button type="primary" @click="handleStartSurge(item)">开始手术</Button>
+                                    <Button type="primary" @click="handleStartWork(item)">开始面诊</Button>
                                     <Button @click="handleRest(item.id)">休息</Button>
                                 </Space>
                                 <Space v-if="item.status === 2">
                                     <Button type="primary" @click="handleDoctorWork(item.id)">上班</Button>
                                 </Space>
+                                <Space v-if="item.status === 3">
+                                    <Button type="primary" @click="handleDoctorWork(item.id)">结束面诊</Button>
+                                </Space>
                                 <div v-if="item.status === 1">
-                                    <Space direction="vertical" style="padding-bottom:10px;">
-                                        <div>
-                                            当前手术项目:
-                                            <Tag color="#f50">{{ item.surgery_name }}</Tag>
-                                        </div>
-                                        <div>
-                                            手术开始时间:
-                                            <Tag color="orange">{{ item.start_time }}</Tag>
-                                        </div>
-                                        <div>
-                                            手术预计结束时间:
-                                            <Tag color="orange">{{ item.end_time }}</Tag>
-                                        </div>
-                                    </Space>
-                                    <Progress :percent="item.progress" :show-info="false"/>
-                                    <p v-if="item.progress === 100" style="color: rgb(153 143 143);padding:10px 0;margin:0;">
-                                        手术可能已经结束.
-                                    </p>
+                                    <template v-if="item.surgery_id">
+                                        <Space direction="vertical" style="padding-bottom:10px;">
+                                            <div>
+                                                当前手术项目:
+                                                <Tag color="#f50">{{ item.surgery_name }}</Tag>
+                                            </div>
+                                            <div>
+                                                手术开始时间:
+                                                <Tag color="orange">{{ item.start_time }}</Tag>
+                                            </div>
+                                            <div>
+                                                手术预计结束时间:
+                                                <Tag color="orange">{{ item.end_time }}</Tag>
+                                            </div>
+                                        </Space>
+                                        <Progress :percent="item.progress" :show-info="false"/>
+                                        <p v-if="item.progress === 100"
+                                           style="color: rgb(153 143 143);padding:10px 0;margin:0;">
+                                            手术可能已经结束.
+                                        </p>
+                                    </template>
                                     <Space>
-                                        <Button danger type="primary" @click="handleEndSurgery(item.id)">结束手术</Button>
+                                        <Button danger @click="handleEndSurgery(item.id)">结束手术
+                                        </Button>
                                         <Button @click="handleDelaySurgery(item)">推迟结束时间</Button>
                                     </Space>
 
@@ -125,7 +136,8 @@
             <template #footer>
                 <Space>
                     <Button :disbabled="delaySurgeryLoading" @click="onDelayModalCancel">取消</Button>
-                    <Button type="primary" :loading="delaySurgeryLoading" @click="handleDelaySurgerySubmit">确认</Button>
+                    <Button type="primary" :loading="delaySurgeryLoading" @click="handleDelaySurgerySubmit">确认
+                    </Button>
                 </Space>
             </template>
         </Modal>
@@ -156,6 +168,7 @@ import {useDoctorStore} from "../stores/doctor";
 import {onMounted, reactive, ref} from "vue";
 import dayjs from "dayjs";
 import {useHead} from "@unhead/vue";
+import {useRoute, useRouter} from "vue-router";
 
 const open = ref(false);
 const visbleModal = ref(false);
@@ -166,6 +179,7 @@ const submitLoading = ref(false);
 const activeItem = ref(null);
 const delayActiveItem = ref(null);
 const formRef = ref();
+const singlePage = ref(false);
 const formState = reactive({
     'surgery_id': null,
     'surgery_room': null,
@@ -194,6 +208,8 @@ const rules = {
 }
 const plainOptions = Array.from({length: 10}, (_, i) => ({label: `手术室${i + 1}`, value: i + 1}));
 const doctorStore = useDoctorStore();
+const route = useRoute();
+const router = useRouter();
 
 
 const handleChange = (val) => {
@@ -252,37 +268,18 @@ const onDelayModalCancel = () => {
 }
 
 const handleRest = (id) => {
-    Modal.confirm({
-        title: '确认医生休息?',
-        okText: "确认",
-        cancelText: '取消',
-        onOk() {
-            // return new Promise((resolve, reject) => {
-            //     setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
-            // }).catch(() => console.log('Oops errors!'));
-            return doctorStore.doctorRest(id);
-        },
-        onCancel() {
-            console.log('Cancel');
-        },
-    });
+    doctorStore.doctorRest(id)
+}
+const handleStartWork = (item) => {
+    doctorStore.doctorStartWork(item.id);
+}
+const handleStartSurge = (item) => {
+    doctorStore.doctorStartSurge(item.id);
 }
 
+
 const handleDoctorWork = (id) => {
-    Modal.confirm({
-        title: '确认医生上班?',
-        okText: "确认",
-        cancelText: '取消',
-        onOk() {
-            // return new Promise((resolve, reject) => {
-            //     setTimeout(Math.random() > 0.5 ? resolve : reject, 1000);
-            // }).catch(() => console.log('Oops errors!'));
-            return doctorStore.doctorNormal(id);
-        },
-        onCancel() {
-            console.log('Cancel');
-        },
-    });
+    doctorStore.doctorNormal(id);
 }
 
 const reloadDoctor = () => {
@@ -326,7 +323,7 @@ const handleDelaySurgerySubmit = async () => {
         'end_date': endDate
     })
     delaySurgeryLoading.value = false;
-    console.log("response",response);
+    console.log("response", response);
     if (response.data.code === 0) {
         onDelayModalCancel();
     }
@@ -343,10 +340,25 @@ onMounted(() => {
     //     if (open.value || showConfirm.value) return;
     //     doctorStore.fetchDoctors();
     // }, 30000);
+    if (route.query?.d_id)
+        doctorStore.setDepartmentId(route.query.d_id);
+    if (route.query?.doctor_id) {
+        singlePage.value = true;
+        doctorStore.setDoctorId(route.query.doctor_id);
+    }
 
     doctorStore.fetchDoctors();
     doctorStore.fetchSurgeries();
 })
+
+const toDoctorPage = (id) => {
+    // // 跳转到 /manage?doctor_id={id}，并刷新页面数据
+    router.push({path: '/manage', query: {doctor_id: id}});
+    doctorStore.setDoctorId(id);
+    singlePage.value = true;
+    reloadDoctor();
+
+}
 
 
 const startSurgery = (id) => {

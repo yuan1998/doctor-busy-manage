@@ -13,11 +13,13 @@ class Doctor extends Model
     const STATUS_NORMAL = 0;
     const STATUS_IN_SURGERY = 1;
     const STATUS_REST = 2;
+    const STATUS_WORK = 3;
 
     const STATUS_MAP = [
         self::STATUS_NORMAL => '可面诊',
         self::STATUS_IN_SURGERY => '手术中',
         self::STATUS_REST => '休息',
+        self::STATUS_WORK => '面诊中',
     ];
     protected $fillable = [
         'name',
@@ -27,6 +29,7 @@ class Doctor extends Model
         'surgery_room',
         'start_date',
         'end_date',
+        'department_id',
     ];
     protected $casts = [
         'enable' => 'boolean',
@@ -37,6 +40,11 @@ class Doctor extends Model
     public function surgery()
     {
         return $this->belongsTo(Surgery::class);
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
     }
 
     public function getTimeRangeAttribute()

@@ -37,8 +37,8 @@ const requestPut = async (url, params) => {
     return await instance.put(url, params);
 }
 
-export const doctorIndex = async () => {
-    return await requestGet('/api/doctors');
+export const doctorIndex = async (query) => {
+    return await requestGet('/api/doctors',query);
 }
 export const doctorUpdate =  (id, params) => {
     return  requestPut(`/api/doctors/${id}`, params);

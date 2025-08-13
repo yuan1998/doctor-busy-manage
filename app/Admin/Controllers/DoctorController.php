@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\Department;
 use App\Models\Doctor;
 use App\Models\Surgery;
 use Carbon\Carbon;
@@ -21,20 +22,34 @@ class DoctorController extends AdminController
     {
         return Grid::make(new Doctor(), function (Grid $grid) {
 
-            $grid->model()->with(['surgery'])->orderBy('id', 'desc');
+            $grid->model()->with(['surgery', 'department'])->orderBy('id', 'desc');
+
+            $grid->selector(function (Grid\Tools\Selector $selector) {
+                $options = Department::query()->select(['id', 'name'])
+                    ->pluck('name', 'id')
+                    ->prepend('全部', '');
+
+                $selector->select('department_id', '科室', $options);
+                $selector->select('enable', '是否启用', [
+                    '' => '全部',
+                    0 => '禁用',
+                    1 => '启用',
+                ]);
+            });
+
 
             $grid->column('id')->sortable();
             $grid->column('name');
             $grid->column('enable')->switch();
             $grid->column('status')->using(Doctor::STATUS_MAP);
             $grid->column('surgery.name', '手术项目')->display(function ($surgery) {
-                if ($this->status == Doctor::STATUS_IN_SURGERY) {
+                if ($surgery && $this->status == Doctor::STATUS_IN_SURGERY) {
                     return join("<br/>", ["项目名称: $surgery", "手术时间: $this->time_range"]);
                 }
                 return "无手术";
             });
 //            $grid->column('start_date');
-//            $grid->column('end_date');
+            $grid->column('department.name', '科室');
             $grid->column('created_at');
             $grid->column('updated_at')->sortable();
 
@@ -94,7 +109,7 @@ class DoctorController extends AdminController
                     if (!$surgery) {
                         return $form->response()->error("手术项目不存在");
                     }
-                    $form->start_date =  now();
+                    $form->start_date = now();
                     $form->end_date = now()->addMinutes($surgery->surgery_time);
 //                    $form->input('start_date', $now);
 //                    $form->input('end_date', $now->addMinutes($surgery->surgery_time));

@@ -22,4 +22,5 @@ Route::group([
     });
     $router->resource('doctors', "DoctorController");
     $router->resource('surgeries', "SurgeryController");
+    $router->resource('departments', "DepartmentController");
 });

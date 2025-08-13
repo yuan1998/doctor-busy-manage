@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use App\Models\Department;
 use App\Models\Surgery;
 use Dcat\Admin\Form;
 use Dcat\Admin\Grid;
@@ -18,15 +19,36 @@ class SurgeryController extends AdminController
     protected function grid()
     {
         return Grid::make(new Surgery(), function (Grid $grid) {
+            $grid->model()->with(['department']);
+            $grid->scrollbarX();
+            $grid->selector(function (Grid\Tools\Selector $selector) {
+                $options = Department::query()
+                    ->select(['id', 'name'])
+                    ->pluck('name', 'id')
+                    ->prepend('全部' ,'');
+                $selector->select('department_id', '科室', $options);
+                $selector->select('enable', '是否启用', [
+                    '' => '全部',
+                    0 => '禁用',
+                    1 => '启用',
+                ]);
+            });
+
             $grid->column('id')->sortable();
+            $grid->column('department.name', '科室');
             $grid->column('name');
             $grid->column('enable')->switch();
             $grid->column('surgery_time');
             $grid->column('created_at');
-            $grid->column('updated_at')->sortable();
 
             $grid->filter(function (Grid\Filter $filter) {
                 $filter->equal('id');
+                $filter->like('name');
+                $filter->equal('enable')->radio([
+                    '' => '全部',
+                    0 => '禁用',
+                    1 => '启用',
+                ]);
 
             });
         });

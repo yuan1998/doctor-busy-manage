@@ -1,7 +1,7 @@
 <template>
     <div>
         <h2 class="page-title">
-            🚀 整形外科医生手术动态表
+            🚀 {{ doctorStore.department?.name || '' }}医生手术动态表
         </h2>
         <h4 style="margin: 0;padding-left: 25px;">
             {{
@@ -15,16 +15,16 @@
                 <ListItem>
                     <Space direction="vertical" style="width:100%">
                         <BadgeRibbon :text="item.statusText" :color="item.statusColor">
-                            <Card hoverable class="w-full" >
+                            <Card hoverable class="w-full">
                                 <template #title>
                                     <div>
-                                        <b style="margin-right:10px;">{{item.name}}</b>
-                                        <Tag v-if="item.status === 1" color="#f50">
+                                        <b style="margin-right:10px;">{{ item.name }}</b>
+                                        <Tag v-if="item.status === 1 && item.surgery_room" color="#f50">
                                             手术间{{ item.surgery_room }}
                                         </Tag>
                                     </div>
                                 </template>
-                                <div v-if="item.status === 1">
+                                <div v-if="item.status === 1 && item.surgery_name ">
                                     <Space direction="vertical" style="padding-bottom:10px;">
                                         <div>
                                             当前手术项目:
@@ -40,7 +40,8 @@
                                         </div>
                                     </Space>
                                     <Progress :percent="item.progress" :show-info="false"/>
-                                    <p v-if="item.progress === 100" style="color: rgb(153 143 143);padding-top: 10px;margin:0;">
+                                    <p v-if="item.progress === 100"
+                                       style="color: rgb(153 143 143);padding-top: 10px;margin:0;">
                                         手术可能已经结束.
                                     </p>
                                 </div>
@@ -64,14 +65,18 @@ import {List, ListItem, Card, BadgeRibbon, Space, Progress, Tag, Button} from 'a
 import {useDoctorStore} from "../stores/doctor";
 import {onMounted} from "vue";
 import {useHead} from "@unhead/vue";
+import {useRoute} from "vue-router";
 
 const doctorStore = useDoctorStore();
+const router = useRoute();
 
 const reloadDoctor = () => {
     doctorStore.fetchDoctors();
 }
 
 onMounted(() => {
+    if (router.query?.d_id)
+        doctorStore.setDepartmentId(router.query.d_id);
     // 30 秒 刷新一次
     setInterval(() => {
         doctorStore.fetchDoctors();

@@ -9,4 +9,8 @@ use Illuminate\Database\Eloquent\Model;
 class Surgery extends Model
 {
     use HasFactory,HasDateTimeFormatter;
+
+    public function department() {
+        return $this->belongsTo(Department::class);
+    }
 }

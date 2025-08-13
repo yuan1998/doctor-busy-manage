@@ -37,10 +37,14 @@ namespace Dcat\Admin {
      * @property Grid\Column|Collection remember_token
      * @property Grid\Column|Collection username
      * @property Grid\Column|Collection enable
+     * @property Grid\Column|Collection has_room
+     * @property Grid\Column|Collection rooms
+     * @property Grid\Column|Collection department_id
      * @property Grid\Column|Collection end_date
      * @property Grid\Column|Collection start_date
      * @property Grid\Column|Collection status
      * @property Grid\Column|Collection surgery_id
+     * @property Grid\Column|Collection surgery_room
      * @property Grid\Column|Collection connection
      * @property Grid\Column|Collection exception
      * @property Grid\Column|Collection failed_at
@@ -83,10 +87,14 @@ namespace Dcat\Admin {
      * @method Grid\Column|Collection remember_token(string $label = null)
      * @method Grid\Column|Collection username(string $label = null)
      * @method Grid\Column|Collection enable(string $label = null)
+     * @method Grid\Column|Collection has_room(string $label = null)
+     * @method Grid\Column|Collection rooms(string $label = null)
+     * @method Grid\Column|Collection department_id(string $label = null)
      * @method Grid\Column|Collection end_date(string $label = null)
      * @method Grid\Column|Collection start_date(string $label = null)
      * @method Grid\Column|Collection status(string $label = null)
      * @method Grid\Column|Collection surgery_id(string $label = null)
+     * @method Grid\Column|Collection surgery_room(string $label = null)
      * @method Grid\Column|Collection connection(string $label = null)
      * @method Grid\Column|Collection exception(string $label = null)
      * @method Grid\Column|Collection failed_at(string $label = null)
@@ -134,10 +142,14 @@ namespace Dcat\Admin {
      * @property Show\Field|Collection remember_token
      * @property Show\Field|Collection username
      * @property Show\Field|Collection enable
+     * @property Show\Field|Collection has_room
+     * @property Show\Field|Collection rooms
+     * @property Show\Field|Collection department_id
      * @property Show\Field|Collection end_date
      * @property Show\Field|Collection start_date
      * @property Show\Field|Collection status
      * @property Show\Field|Collection surgery_id
+     * @property Show\Field|Collection surgery_room
      * @property Show\Field|Collection connection
      * @property Show\Field|Collection exception
      * @property Show\Field|Collection failed_at
@@ -180,10 +192,14 @@ namespace Dcat\Admin {
      * @method Show\Field|Collection remember_token(string $label = null)
      * @method Show\Field|Collection username(string $label = null)
      * @method Show\Field|Collection enable(string $label = null)
+     * @method Show\Field|Collection has_room(string $label = null)
+     * @method Show\Field|Collection rooms(string $label = null)
+     * @method Show\Field|Collection department_id(string $label = null)
      * @method Show\Field|Collection end_date(string $label = null)
      * @method Show\Field|Collection start_date(string $label = null)
      * @method Show\Field|Collection status(string $label = null)
      * @method Show\Field|Collection surgery_id(string $label = null)
+     * @method Show\Field|Collection surgery_room(string $label = null)
      * @method Show\Field|Collection connection(string $label = null)
      * @method Show\Field|Collection exception(string $label = null)
      * @method Show\Field|Collection failed_at(string $label = null)

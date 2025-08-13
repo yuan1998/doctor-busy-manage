@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Department;
 use App\Models\Doctor;
 use App\Models\Surgery;
 use Illuminate\Http\Request;
@@ -9,11 +10,28 @@ use Illuminate\Http\Request;
 class DoctorController extends Controller
 {
     // 获取所有 enable 的 Doctor
-    public function index()
+    public function index(Request $request)
     {
-        $doctors = Doctor::with(['surgery'])->where('enable', 1)->get();
+        $dId = $request->get('department_id');
+        $doctorId = $request->get('doctor_id');
+        $department = null;
+        $doctorsQuery = Doctor::with(['surgery'])
+            ->where('enable', 1);
+
+        if ($dId) {
+            $doctorsQuery->where('department_id', $dId);
+            $department = Department::query()->where('id', $dId)->first();
+        }
+        if ($doctorId) {
+            $doctorsQuery->where('id', $doctorId);
+        }
+
+        $doctors = $doctorsQuery->get();
         return response()->json([
-            'data' => $doctors,
+            'data' => [
+                'doctors' => $doctors,
+                'department' => $department,
+            ],
             'code' => 0,
             'msg' => 'OK'
         ]);
@@ -37,24 +55,20 @@ class DoctorController extends Controller
                     'code' => 1,
                     'msg' => '医生正在手术中，不能重复手术,请先结束手术'
                 ]);
-            $surgery = Surgery::find($surgery_id);
-            if (!$surgery) {
-                return response()->json([
-                    'code' => 1,
-                    'msg' => '手术项目不存在'
-                ]);
-            }
             $doctor->status = Doctor::STATUS_IN_SURGERY;
-            $doctor->surgery_room = $request->get("surgery_room");
-            $doctor->surgery_id = $surgery_id;
-            $startDate = $request->get("start_date");
-            $endDate = $request->get("end_date");
-            if (!$startDate || !$endDate) {
-                $startDate = now();
-                $endDate = now()->addMinutes($surgery->surgery_time);
+            $surgery = Surgery::find($surgery_id);
+            if ($surgery) {
+                $doctor->surgery_room = $request->get("surgery_room");
+                $doctor->surgery_id = $surgery_id;
+                $startDate = $request->get("start_date");
+                $endDate = $request->get("end_date");
+                if (!$startDate || !$endDate) {
+                    $startDate = now();
+                    $endDate = now()->addMinutes($surgery->surgery_time);
+                }
+                $doctor->start_date = $startDate;
+                $doctor->end_date = $endDate;
             }
-            $doctor->start_date = $startDate;
-            $doctor->end_date = $endDate;
         } else {
             $doctor->status = $status;
             $doctor->surgery_id = null;
