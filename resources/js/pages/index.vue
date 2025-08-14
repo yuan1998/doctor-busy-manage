@@ -24,7 +24,7 @@
                                         </Tag>
                                     </div>
                                 </template>
-                                <div v-if="item.status === 1 && item.surgery_name ">
+                                <div v-if="item.status === 1 && item.surgery_id ">
                                     <Space direction="vertical" style="padding-bottom:10px;">
                                         <div>
                                             当前手术项目:
