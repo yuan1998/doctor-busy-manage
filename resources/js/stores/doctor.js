@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 
 const statusMap = {
     0: '可面诊',
-    1: '手术中',
+    1: '治疗中',
     2: '休息',
     3: '面诊中'
 }

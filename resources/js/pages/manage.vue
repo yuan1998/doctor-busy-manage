@@ -16,13 +16,13 @@
                                     <Space>
                                         <div>
                                             <b style="margin-right:10px;">{{ item.name }}</b>
-                                            <Tag v-if="item.status === 1 && item.surgery_room" color="#f50">手术间{{ item.surgery_room }}</Tag>
+                                            <Tag v-if="item.status === 1 && item.surgery_room" color="#f50">治疗间{{ item.surgery_room }}</Tag>
                                         </div>
                                         <Button v-if="!singlePage" type="link" @click="toDoctorPage(item.id)">单独页</Button>
                                     </Space>
                                 </template>
                                 <Space v-if="item.status === 0">
-                                    <Button type="primary" @click="handleStartSurge(item)">开始手术</Button>
+                                    <Button type="primary" @click="handleStartSurge(item)">开始治疗</Button>
                                     <Button type="primary" @click="handleStartWork(item)">开始面诊</Button>
                                     <Button @click="handleRest(item.id)">休息</Button>
                                 </Space>
@@ -36,26 +36,26 @@
                                     <template v-if="item.surgery_id">
                                         <Space direction="vertical" style="padding-bottom:10px;">
                                             <div>
-                                                当前手术项目:
+                                                当前治疗项目:
                                                 <Tag color="#f50">{{ item.surgery_name }}</Tag>
                                             </div>
                                             <div>
-                                                手术开始时间:
+                                                治疗开始时间:
                                                 <Tag color="orange">{{ item.start_time }}</Tag>
                                             </div>
                                             <div>
-                                                手术预计结束时间:
+                                                治疗预计结束时间:
                                                 <Tag color="orange">{{ item.end_time }}</Tag>
                                             </div>
                                         </Space>
                                         <Progress :percent="item.progress" :show-info="false"/>
                                         <p v-if="item.progress === 100"
                                            style="color: rgb(153 143 143);padding:10px 0;margin:0;">
-                                            手术可能已经结束.
+                                            治疗可能已经结束.
                                         </p>
                                     </template>
                                     <Space>
-                                        <Button danger @click="handleEndSurgery(item.id)">结束手术
+                                        <Button danger @click="handleEndSurgery(item.id)">结束治疗
                                         </Button>
                                         <Button @click="handleDelaySurgery(item)">推迟结束时间</Button>
                                     </Space>
@@ -78,7 +78,7 @@
             <template #footer>
                 <Space>
                     <Button :disbabled="submitLoading" @click="onDrawerCancel">取消</Button>
-                    <Button type="primary" :loading="submitLoading" @click="handleOnSubmit">开始手术</Button>
+                    <Button type="primary" :loading="submitLoading" @click="handleOnSubmit">开始治疗</Button>
                 </Space>
             </template>
             <template #title>
@@ -94,7 +94,7 @@
                     :loading="submitLoading"
                     v-if="activeItem"
                 >
-                    <FormItem ref="surgery_id" label="手术项目" name="surgery_id">
+                    <FormItem ref="surgery_id" label="治疗项目" name="surgery_id">
                         <Select
                             ref="select"
                             v-model:value="formState.surgery_id"
@@ -105,17 +105,17 @@
                             </SelectOption>
                         </Select>
                     </FormItem>
-                    <FormItem ref="end_date" label="预计手术结束时间" name="end_date">
+                    <FormItem ref="end_date" label="预计治疗结束时间" name="end_date">
                         <TimePicker v-model:value="formState.end_date" format="HH:mm"/>
                     </FormItem>
-                    <FormItem ref="surgery_room" label="手术室" name="surgery_room">
+                    <FormItem ref="surgery_room" label="治疗室" name="surgery_room">
                         <RadioGroup v-model:value="formState.surgery_room" :options="plainOptions"/>
                     </FormItem>
                 </Form>
             </Spin>
         </Modal>
 
-        <Modal v-model:open="visbleModal" title="推迟手术时间">
+        <Modal v-model:open="visbleModal" title="推迟治疗时间">
             <RadioGroup v-model:value="delayEndTime" :disabled="delaySurgeryLoading">
                 <Radio :style="radioStyle" :value="10">10 分钟</Radio>
                 <Radio :style="radioStyle" :value="20">20 分钟</Radio>
@@ -197,16 +197,16 @@ const labelCol = {span: 5};
 const wrapperCol = {span: 13};
 const rules = {
     surgery_id: [
-        {required: true, message: '请选择手术项目', trigger: 'change'},
+        {required: true, message: '请选择治疗项目', trigger: 'change'},
     ],
     end_date: [
-        {required: true, message: '请选择手术时间', trigger: 'change'},
+        {required: true, message: '请选择治疗时间', trigger: 'change'},
     ],
     surgery_room: [
-        {required: true, message: '请选择手术室', trigger: 'change'},
+        {required: true, message: '请选择治疗室', trigger: 'change'},
     ],
 }
-const plainOptions = Array.from({length: 10}, (_, i) => ({label: `手术室${i + 1}`, value: i + 1}));
+const plainOptions = Array.from({length: 10}, (_, i) => ({label: `治疗室${i + 1}`, value: i + 1}));
 const doctorStore = useDoctorStore();
 const route = useRoute();
 const router = useRouter();
@@ -288,7 +288,7 @@ const reloadDoctor = () => {
 
 const handleEndSurgery = (id) => {
     Modal.confirm({
-        title: '是否结束医生的手术?',
+        title: '是否结束医生的治疗?',
         okText: "确认",
         cancelText: '取消',
         onOk() {
